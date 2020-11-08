@@ -1,8 +1,9 @@
+
 apiVersion: v1
-appVersion: "2.1.5"
+appVersion: "3.1.1"
 description: A Helm chart for CTFd
 name: ctfd
-version: 0.0.2
+version: 0.1.0
 home: https://gitlab.com/momothereal/helm-charts
 icon: https://raw.githubusercontent.com/CTFd/CTFd/master/CTFd/themes/core/static/img/logo.png
 keywords:

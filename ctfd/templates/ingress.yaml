@@ -1,5 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "ctfd.fullname" . -}}
+{{- $serviceName := include "ctfd.fullname" . -}}
+{{- $servicePort := .Values.service.port -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -9,12 +11,25 @@ metadata:
     helm.sh/chart: {{ include "ctfd.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-  {{- with .Values.ingress.annotations }}
+
+  {{- if .Values.ingress.annotations}}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+{{- end }}
 spec:
-{{- if .Values.ingress.tls }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          - path: {{ .path }}
+            backend:
+              serviceName: {{ default $serviceName .serviceName }}
+              servicePort: http
+    {{- end }}
+  {{- if .Values.ingress.tls }}
   tls:
   {{- range .Values.ingress.tls }}
     - hosts:
@@ -23,17 +38,7 @@ spec:
       {{- end }}
       secretName: {{ .secretName }}
   {{- end }}
-{{- end }}
-  rules:
-  {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
-        paths:
-        {{- range .paths }}
-          - path: {{ . }}
-            backend:
-              serviceName: {{ $fullName }}
-              servicePort: http
-        {{- end }}
   {{- end }}
 {{- end }}
+
+
